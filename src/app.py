@@ -15,6 +15,10 @@ SampleTable = Database.SampleTable
 def inicial():
     return 'La API está funcionando'
 
+@app.route('/miruta/<name>')
+def inicialPrueba(name):
+	return 'Mi nombre es: '+name
+
 # To insert a single document into the database, 
 # insert_one() function is used localhost:3000/insert-one/mali/1/
 @app.route('/insert-one/<name>/<id>/', methods=['GET']) 
