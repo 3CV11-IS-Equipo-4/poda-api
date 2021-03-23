@@ -11,6 +11,10 @@ Database = client.get_database('Example')
 # Table 
 SampleTable = Database.SampleTable 
 
+@app.route('/')
+def inicial():
+    return 'La API está funcionando'
+
 # To insert a single document into the database, 
 # insert_one() function is used localhost:3000/insert-one/mali/1/
 @app.route('/insert-one/<name>/<id>/', methods=['GET']) 
