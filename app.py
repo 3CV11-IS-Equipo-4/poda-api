@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request 
-from flask_cors import CORS 
+from flask_cors import CORS, cross_origin
 import pymongo 
 import os
 from validaciones_solicitud import validaciones_insertar_solicitud
@@ -23,6 +23,10 @@ try:
 	Database = client.get_database(DB_NAME) 
 except:
 	Database = 'Example'
+
+# Manejo de CORS
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 #Manejor de Login
 app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
