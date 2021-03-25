@@ -30,7 +30,6 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
 
 # Table 
-SampleTable = Database.SampleTable
 solicitud_tabla = Database.Solicitud
 usuario_tabla = Database.Usuario
 
@@ -39,64 +38,9 @@ def inicial():
 	print(request.headers)
 	return 'La API está funcionando'
 
-@app.route('/miruta/<name>')
-def inicialPrueba(name):
-	return 'Mi nombre es: '+name
-
-# To insert a single document into the database, 
-# insert_one() function is used localhost:3000/insert-one/mali/1/
-@app.route('/insert-one/<name>/<id>/', methods=['GET']) 
-def insertOne(name, id): 
-	queryObject = {
-		'Name': name, 
-		'ID': id
-	} 
-	query = SampleTable.insert_one(queryObject) 
-	return "Query inserted...!!!"
-
-# To find the first document that matches a defined query, 
-# find_one function is used and the query to match is passed 
-# as an argument. 
-@app.route('/find-one/<argument>/<value>/', methods=['GET']) 
-def findOne(argument, value): 
-	queryObject = {argument: value} 
-	query = SampleTable.find_one(queryObject) 
-	query.pop('_id') 
-	return jsonify(query) 
-
-# To find all the entries/documents in a table/collection, 
-# find() function is used. If you want to find all the documents 
-# that matches a certain query, you can pass a queryObject as an 
-# argument. 
-@app.route('/find/', methods=['GET']) 
-def findAll(): 
-	query = SampleTable.find() 
-	output = {} 
-	i = 0
-	for x in query: 
-		output[i] = x 
-		output[i].pop('_id') 
-		i += 1
-	return jsonify(output) 
-
-
-# To update a document in a collection, update_one() 
-# function is used. The queryObject to find the document is passed as 
-# the first argument, the corresponding updateObject is passed as the 
-# second argument under the '$set' index. 
-@app.route('/update/<key>/<value>/<element>/<updateValue>/', methods=['GET']) 
-def update(key, value, element, updateValue): 
-	queryObject = {key: value} 
-	updateObject = {element: updateValue} 
-	query = SampleTable.update_one(queryObject, {'$set': updateObject}) 
-	if query.acknowledged: 
-		return "Update Successful"
-	else: 
-		return "Update Unsuccessful"
-
-
 #Registrar usuarios.
 @app.route('/usuarios/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def registrar_usuario():
 	datos_entrada = request.json
 	datos_finales_usuario = validaciones_insertar_usuario(datos_entrada)
@@ -133,6 +77,7 @@ def registrar_solicitud():
 
 #Consulta de solicitudes para ciudadanos.
 @app.route('/solicitudes/ciudadanos/<email>', methods=['GET'])
+@cross_origin(supports_credentials=True)
 def consultar_solicitudes_ciudadano(email):
 
 	resultado_query = solicitud_tabla.find({'email': email})
@@ -144,25 +89,41 @@ def consultar_solicitudes_ciudadano(email):
 	
 	return {'solicitudes': resultado_filtrado}, 200	
 
+#Login
 @app.route('/login/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def iniciar_sesion():
+	
 	datos_inicio_sesion = request.json
-
 	respuesta_datos = {}
 
-	SampleTable.find_one(queryObject)
+	resultado = usuario_tabla.find_one({'email': datos_inicio_sesion['email'], 'password': datos_inicio_sesion['password']})
 
-	if datos_inicio_sesion['email'] == 'tona@hotmail.com' and datos_inicio_sesion['password'] == '12345':
-		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': True}
+	print(resultado)
+	permiso_admin = resultado['permiso_administrador']
+
+	if resultado is not None:
+		if permiso_admin:
+			respuesta_datos = {'nombres': resultado['nombres'], 
+								'apellido_paterno': resultado['apellido_paterno'],
+								'apellido_materno': resultado['apellido_materno'], 
+								'email': datos_inicio_sesion['email'],
+								'permiso_administrador': True,
+								'sesion_valida': True
+								}
+		else:
+			respuesta_datos = {'nombres': resultado['nombres'], 
+								'apellido_paterno': resultado['apellido_paterno'],
+								'apellido_materno': resultado['apellido_materno'], 
+								'email': datos_inicio_sesion['email'], 
+								'sesion_valida': True, 
+								'permiso_administrador': False,
+								'rol': resultado['rol']
+								}
 	else:
 		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': False}
 	
 	return respuesta_datos, 200
-
-@app.route('/logout/', methods=['POST'])
-def cerrar_sesion():
-	session.pop('ciudadano', None)
-	return "Cerrar sesión"
 
 if __name__ == '__main__': 
 	app.run(host='0.0.0.0', port=8000, debug=True) 
