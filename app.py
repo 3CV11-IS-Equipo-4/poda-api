@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request 
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS, cross_origin
 import pymongo 
 import os
@@ -9,8 +9,6 @@ app = Flask(__name__)
 
 CONNECTION_URL = os.environ.get('CONNECTION_URL')
 DB_NAME = os.environ.get('DB_NAME')
-
-print(CONNECTION_URL)
 
 
 if CONNECTION_URL[0] == chr(34) and CONNECTION_URL[-1] == chr(34):
@@ -25,13 +23,11 @@ except:
 	Database = 'Example'
 
 # Manejo de CORS
-CORS(app)
+CORS(app, supoort_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 #Manejor de Login
 app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 # Table 
 SampleTable = Database.SampleTable
@@ -40,6 +36,7 @@ usuario_tabla = Database.Usuario
 
 @app.route('/')
 def inicial():
+	print(request.headers)
 	return 'La API está funcionando'
 
 @app.route('/miruta/<name>')
@@ -120,7 +117,10 @@ def registrar_usuario():
 #	return 'Hola', 200	
 
 #Rutas de solicitud.
+
+#Registrar solicitud.
 @app.route('/solicitudes/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def registrar_solicitud():
 	
 	datos_entrada = request.json
@@ -144,5 +144,25 @@ def consultar_solicitudes_ciudadano(email):
 	
 	return {'solicitudes': resultado_filtrado}, 200	
 
+@app.route('/login/', methods=['POST'])
+def iniciar_sesion():
+	datos_inicio_sesion = request.json
+
+	respuesta_datos = {}
+
+	SampleTable.find_one(queryObject)
+
+	if datos_inicio_sesion['email'] == 'tona@hotmail.com' and datos_inicio_sesion['password'] == '12345':
+		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': True}
+	else:
+		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': False}
+	
+	return respuesta_datos, 200
+
+@app.route('/logout/', methods=['POST'])
+def cerrar_sesion():
+	session.pop('ciudadano', None)
+	return "Cerrar sesión"
+
 if __name__ == '__main__': 
-	app.run(debug=True) 
+	app.run(host='0.0.0.0', port=8000, debug=True) 
