@@ -1,17 +1,27 @@
 from flask import Flask, jsonify, request 
 from flask_cors import CORS 
 import pymongo 
+import os
 
 
 app = Flask(__name__) 
-app.config.from_envvar('APP_SETTINGS')
-client = pymongo.MongoClient(app.config['CONNECTION_URL']) 
+
+CONNECTION_URL = os.environ.get('CONNECTION_URL')
+DB_NAME = os.environ.get('DB_NAME')
+
+print(CONNECTION_URL)
+
+
+if CONNECTION_URL[0] == chr(34) and CONNECTION_URL[-1] == chr(34):
+	client = pymongo.MongoClient(CONNECTION_URL[1:-1]) 
+else:
+	client = pymongo.MongoClient(CONNECTION_URL) 
+
 
 # Database
-if 'DB_NAME' in app.config.keys():
-	Database = client.get_database(app.config['DB_NAME']) 
-else:
-	print("Database name not found.")
+try:
+	Database = client.get_database(DB_NAME) 
+except:
 	Database = 'Example'
 
 # Table 
