@@ -2,18 +2,24 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS 
 import pymongo 
 
-connection_url = 'mongodb+srv://dbadmin:dbadmin@cluster0.u75u0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-app = Flask(__name__) 
-client = pymongo.MongoClient(connection_url) 
 
-# Database 
-Database = client.get_database('Example') 
+app = Flask(__name__) 
+app.config.from_envvar('APP_SETTINGS')
+client = pymongo.MongoClient(app.config['CONNECTION_URL']) 
+
+# Database
+if 'DB_NAME' in app.config.keys():
+	Database = client.get_database(app.config['DB_NAME']) 
+else:
+	print("Database name not found.")
+	return
+
 # Table 
 SampleTable = Database.SampleTable 
 
 @app.route('/')
 def inicial():
-    return 'La API está funcionando'
+	return 'La API está funcionando'
 
 # To insert a single document into the database, 
 # insert_one() function is used localhost:3000/insert-one/mali/1/
