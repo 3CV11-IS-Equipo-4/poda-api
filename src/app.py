@@ -12,7 +12,7 @@ if 'DB_NAME' in app.config.keys():
 	Database = client.get_database(app.config['DB_NAME']) 
 else:
 	print("Database name not found.")
-	return
+	Database = 'Example'
 
 # Table 
 SampleTable = Database.SampleTable 
