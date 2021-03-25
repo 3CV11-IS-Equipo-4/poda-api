@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS 
 import pymongo 
 import os
-
+from validaciones_solicitud import validaciones_insertar_solicitud
 
 app = Flask(__name__) 
 
@@ -17,7 +17,6 @@ if CONNECTION_URL[0] == chr(34) and CONNECTION_URL[-1] == chr(34):
 else:
 	client = pymongo.MongoClient(CONNECTION_URL) 
 
-
 # Database
 try:
 	Database = client.get_database(DB_NAME) 
@@ -25,7 +24,8 @@ except:
 	Database = 'Example'
 
 # Table 
-SampleTable = Database.SampleTable 
+SampleTable = Database.SampleTable
+solicitud_tabla = Database.Solicitud
 
 @app.route('/')
 def inicial():
@@ -86,6 +86,18 @@ def update(key, value, element, updateValue):
 	else: 
 		return "Update Unsuccessful"
 
+
+#Rutas de solicitud.
+@app.route('/solicitudes/', methods=['POST'])
+def registrar_solicitud():
+	
+	datos_entrada = request.json
+	datos_finales_ciudadano, datos_finales_solicitud = validaciones_insertar_solicitud(datos_entrada)
+	resultado = solicitud_tabla.insert_one(datos_finales_solicitud)
+	datos_finales_solicitud.pop('_id')
+	datos_finales_solicitud['_id'] = str(resultado.inserted_id)
+
+	return datos_finales_solicitud, 200
 
 if __name__ == '__main__': 
 	app.run(debug=True) 
