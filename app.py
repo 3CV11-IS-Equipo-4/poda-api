@@ -3,6 +3,7 @@ from flask_cors import CORS
 import pymongo 
 import os
 from validaciones_solicitud import validaciones_insertar_solicitud
+from validaciones_usuario import validaciones_insertar_usuario
 
 app = Flask(__name__) 
 
@@ -23,9 +24,15 @@ try:
 except:
 	Database = 'Example'
 
+#Manejor de Login
+app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
+login_manager = LoginManager()
+login_manager.init_app(app)
+
 # Table 
 SampleTable = Database.SampleTable
 solicitud_tabla = Database.Solicitud
+usuario_tabla = Database.Usuario
 
 @app.route('/')
 def inicial():
@@ -87,6 +94,27 @@ def update(key, value, element, updateValue):
 		return "Update Unsuccessful"
 
 
+#Registrar usuarios.
+@app.route('/usuarios/', methods=['POST'])
+def registrar_usuario():
+	datos_entrada = request.json
+	datos_finales_usuario = validaciones_insertar_usuario(datos_entrada)
+	resultado = usuario_tabla.insert_one(datos_finales_usuario)
+	datos_finales_usuario.pop('_id')
+	datos_finales_usuario['_id'] = str(resultado.inserted_id)
+
+	return datos_finales_usuario, 200
+
+
+#Consulta de solicitudes para trabajadores.
+#@app.route('/solicitudes/usuarios/<email>', methods=['GET'])
+#def consultar_solicitudes_usuarios(email):
+
+#	informacion_usuario = usuario_tabla.find({'email': email})
+#	print(informacion_usuario['alcaldia'])
+	
+#	return 'Hola', 200	
+
 #Rutas de solicitud.
 @app.route('/solicitudes/', methods=['POST'])
 def registrar_solicitud():
@@ -98,6 +126,19 @@ def registrar_solicitud():
 	datos_finales_solicitud['_id'] = str(resultado.inserted_id)
 
 	return datos_finales_solicitud, 200
+
+#Consulta de solicitudes para ciudadanos.
+@app.route('/solicitudes/ciudadanos/<email>', methods=['GET'])
+def consultar_solicitudes_ciudadano(email):
+
+	resultado_query = solicitud_tabla.find({'email': email})
+	resultado_filtrado = []
+	for solicitud in resultado_query:
+		temp__id = str(solicitud['_id'])
+		solicitud['_id'] = temp__id
+		resultado_filtrado.append(solicitud)
+	
+	return {'solicitudes': resultado_filtrado}, 200	
 
 if __name__ == '__main__': 
 	app.run(debug=True) 
