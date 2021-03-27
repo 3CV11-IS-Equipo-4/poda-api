@@ -54,17 +54,7 @@ def registrar_usuario():
 	datos_finales_usuario['_id'] = str(resultado.inserted_id)
 
 	return datos_finales_usuario, 200
-
-
-#Consulta de solicitudes para trabajadores.
-#@app.route('/solicitudes/usuarios/<email>', methods=['GET'])
-#def consultar_solicitudes_usuarios(email):
-
-#	informacion_usuario = usuario_tabla.find({'email': email})
-#	print(informacion_usuario['alcaldia'])
 	
-#	return 'Hola', 200	
-
 #Rutas de solicitud.
 
 #Registrar solicitud.
@@ -93,42 +83,6 @@ def consultar_solicitudes_ciudadano(email):
 		resultado_filtrado.append(solicitud)
 	
 	return {'solicitudes': resultado_filtrado}, 200	
-
-#Login
-@app.route('/login/', methods=['POST'])
-@cross_origin(supports_credentials=True)
-def iniciar_sesion():
-	
-	datos_inicio_sesion = request.json
-	respuesta_datos = {}
-
-	resultado = usuario_tabla.find_one({'email': datos_inicio_sesion['email'], 'password': datos_inicio_sesion['password']})
-
-	print(resultado)
-	permiso_admin = resultado['permiso_administrador']
-
-	if resultado is not None:
-		if permiso_admin:
-			respuesta_datos = {'nombres': resultado['nombres'], 
-								'apellido_paterno': resultado['apellido_paterno'],
-								'apellido_materno': resultado['apellido_materno'], 
-								'email': datos_inicio_sesion['email'],
-								'permiso_administrador': True,
-								'sesion_valida': True
-								}
-		else:
-			respuesta_datos = {'nombres': resultado['nombres'], 
-								'apellido_paterno': resultado['apellido_paterno'],
-								'apellido_materno': resultado['apellido_materno'], 
-								'email': datos_inicio_sesion['email'], 
-								'sesion_valida': True, 
-								'permiso_administrador': False,
-								'rol': resultado['rol']
-								}
-	else:
-		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': False}
-	
-	return respuesta_datos, 200
 """
 
 if __name__ == '__main__': 
