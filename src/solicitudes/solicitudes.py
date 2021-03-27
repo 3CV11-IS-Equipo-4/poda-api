@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, session
+from flask import Blueprint, request, make_response
 from src.solicitudes.validaciones_solicitud import validaciones_insertar_solicitud
 
 def construir_bp_solicitudes(cliente_mongo, Database):
