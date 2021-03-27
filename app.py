@@ -2,8 +2,10 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS, cross_origin
 import pymongo 
 import os
-from validaciones_solicitud import validaciones_insertar_solicitud
-from validaciones_usuario import validaciones_insertar_usuario
+
+#Blueprints
+from src.solicitudes.solicitudes import construir_bp_solicitudes
+from src.usuarios.usuarios import construir_bp_usuarios
 
 app = Flask(__name__) 
 
@@ -33,11 +35,14 @@ app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
 solicitud_tabla = Database.Solicitud
 usuario_tabla = Database.Usuario
 
+app.register_blueprint(construir_bp_solicitudes(client, Database, app.secret_key))
+app.register_blueprint(construir_bp_usuarios(client, Database, app.secret_key))
+
 @app.route('/')
 def inicial():
 	print(request.headers)
 	return 'La API está funcionando'
-
+"""
 #Registrar usuarios.
 @app.route('/usuarios/', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -49,17 +54,7 @@ def registrar_usuario():
 	datos_finales_usuario['_id'] = str(resultado.inserted_id)
 
 	return datos_finales_usuario, 200
-
-
-#Consulta de solicitudes para trabajadores.
-#@app.route('/solicitudes/usuarios/<email>', methods=['GET'])
-#def consultar_solicitudes_usuarios(email):
-
-#	informacion_usuario = usuario_tabla.find({'email': email})
-#	print(informacion_usuario['alcaldia'])
 	
-#	return 'Hola', 200	
-
 #Rutas de solicitud.
 
 #Registrar solicitud.
@@ -88,42 +83,7 @@ def consultar_solicitudes_ciudadano(email):
 		resultado_filtrado.append(solicitud)
 	
 	return {'solicitudes': resultado_filtrado}, 200	
-
-#Login
-@app.route('/login/', methods=['POST'])
-@cross_origin(supports_credentials=True)
-def iniciar_sesion():
-	
-	datos_inicio_sesion = request.json
-	respuesta_datos = {}
-
-	resultado = usuario_tabla.find_one({'email': datos_inicio_sesion['email'], 'password': datos_inicio_sesion['password']})
-
-	print(resultado)
-	permiso_admin = resultado['permiso_administrador']
-
-	if resultado is not None:
-		if permiso_admin:
-			respuesta_datos = {'nombres': resultado['nombres'], 
-								'apellido_paterno': resultado['apellido_paterno'],
-								'apellido_materno': resultado['apellido_materno'], 
-								'email': datos_inicio_sesion['email'],
-								'permiso_administrador': True,
-								'sesion_valida': True
-								}
-		else:
-			respuesta_datos = {'nombres': resultado['nombres'], 
-								'apellido_paterno': resultado['apellido_paterno'],
-								'apellido_materno': resultado['apellido_materno'], 
-								'email': datos_inicio_sesion['email'], 
-								'sesion_valida': True, 
-								'permiso_administrador': False,
-								'rol': resultado['rol']
-								}
-	else:
-		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': False}
-	
-	return respuesta_datos, 200
+"""
 
 if __name__ == '__main__': 
 	app.run(host='0.0.0.0', port=8000, debug=True) 
