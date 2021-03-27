@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS, cross_origin
 import pymongo 
 import os
-from validaciones_solicitud import validaciones_insertar_solicitud
-from validaciones_usuario import validaciones_insertar_usuario
+
+#Blueprints
+from src.solicitudes.solicitudes import construir_bp_solicitudes
 
 app = Flask(__name__) 
 
@@ -33,11 +34,13 @@ app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
 solicitud_tabla = Database.Solicitud
 usuario_tabla = Database.Usuario
 
+app.register_blueprint(construir_bp_solicitudes(client, Database))
+
 @app.route('/')
 def inicial():
 	print(request.headers)
 	return 'La API está funcionando'
-
+"""
 #Registrar usuarios.
 @app.route('/usuarios/', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -124,6 +127,7 @@ def iniciar_sesion():
 		respuesta_datos = {'email': datos_inicio_sesion['email'], 'valido': False}
 	
 	return respuesta_datos, 200
+"""
 
 if __name__ == '__main__': 
 	app.run(host='0.0.0.0', port=8000, debug=True) 
