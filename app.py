@@ -35,7 +35,7 @@ app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
 solicitud_tabla = Database.Solicitud
 usuario_tabla = Database.Usuario
 
-app.register_blueprint(construir_bp_solicitudes(client, Database))
+app.register_blueprint(construir_bp_solicitudes(client, Database, app.secret_key))
 app.register_blueprint(construir_bp_usuarios(client, Database, app.secret_key))
 
 @app.route('/')
