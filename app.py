@@ -26,6 +26,8 @@ except:
 
 # Table 
 SampleTable = Database.SampleTable 
+ciudadano_tabla = Database.Ciudadano
+solicitud_tabla = Database.Solicitud
 
 @app.route('/')
 def inicial():
@@ -87,5 +89,61 @@ def update(key, value, element, updateValue):
 		return "Update Unsuccessful"
 
 
-if __name__ == '__main__': 
-	app.run(debug=True) 
+#Consulta de solicitudes usuarios
+@app.route('/solicitudes/<id>/', methods=['GET'])
+def consultar_solicitudesCI(id):
+	print(id)
+
+	dato_ciudadano = ciudadano_tabla.find_one({'id':int(id)})
+	#dato_ciudadano2 = ciudadano_tabla.find_one({'id':int(id)})
+	#dato_ciudadano3 = ciudadano_tabla.find_one({'id':int(id)})
+	#dato_ciudadano4 = ciudadano_tabla.find_one({'id':int(id)})
+	
+	print (dato_ciudadano)
+	#print (dato2_ciudadano)
+	#print (dato3_ciudadano)
+	#print (dato4_ciudadano)
+	nombre = dato_ciudadano ['nombre']
+	#ap_pat = dato2_ciudadano ['apellido_paterno']
+	#ap_mat = dato3_ciudadano ['apellido_materno']
+	#email = dato4_ciudadano ['email']
+
+	dato_solicitud = solicitud_tabla.find ({'nombre': nombre})
+	#dato2_solicitud = solicitud_tabla.find ({'apellido_paterno': apellido paterno})
+	#dato3_solicitud = solicitud_tabla.find ({'apellido_materno': apellido materno})
+	#dato4_solicitud = solicitud_tabla.find ({'email': email})
+	
+
+	for registro in dato_solicitud: 
+		print (registro)
+	return "Los datos del usuarios son los siguientes"
+
+
+#Rutas de solicitud.
+@app.route('/solicitudes/', methods=['POST'])
+def registrar_solicitud():
+	
+	datos_entrada = request.json
+	datos_finales_ciudadano, datos_finales_solicitud = validaciones_insertar_solicitud(datos_entrada)
+	resultado = solicitud_tabla.insert_one(datos_finales_solicitud)
+	datos_finales_solicitud.pop('_id')
+	datos_finales_solicitud['_id'] = str(resultado.inserted_id)
+
+	return datos_finales_solicitud, 200
+
+
+#Inicio de Sesión
+@app.route('/IniciarSesion/', methods=['POST'])
+def inciar_sesion():
+
+	datos_entrada = request.json
+	if email =True:
+		password = True:
+			return "Inicio de sesion exitoso"
+		if
+			return "Correo electronico o Password incorrectos"
+		elif
+			return "Usuario no encontrado"
+
+if __name__ == '__main__':
+	app.run(debug=True)
