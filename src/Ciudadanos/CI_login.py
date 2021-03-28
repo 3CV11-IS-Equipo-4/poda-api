@@ -7,7 +7,7 @@ def construir_bp_ciudadano(cliente_mongo, Database, SECRET_KEY):
 
     ciudadano_tabla = Database.Ciudadano
 
-    @ciudadanos_bp.route("/login/ciudadanos", methods=["POST"])
+    @ciudadano_bp.route("/ciudadanos/login", methods=["POST"])
     def login_ciudadano():
 
         datos_entrada = request.json
@@ -38,4 +38,4 @@ def construir_bp_ciudadano(cliente_mongo, Database, SECRET_KEY):
                 'mimetype':'application/json'
                 })
 
-    return ciudadanos_bp
+    return ciudadano_bp
