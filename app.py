@@ -6,7 +6,7 @@ import os
 #Blueprints
 from src.solicitudes.solicitudes import construir_bp_solicitudes
 from src.usuarios.usuarios import construir_bp_usuarios
-from src.Ciudadanos.CI_login import construir_bp_ciudadano
+from src.ciudadanos.ciudadanos import construir_bp_ciudadano
 
 app = Flask(__name__) 
 

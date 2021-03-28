@@ -1,5 +1,5 @@
 from flask import Blueprint, request, make_response
-from src.Ciudadanos.authCI import encode_auth_token_ciudadano
+from src.ciudadanos.auth import encode_auth_token_ciudadano
 import pymongo
 
 def construir_bp_ciudadano(cliente_mongo, Database, SECRET_KEY):
