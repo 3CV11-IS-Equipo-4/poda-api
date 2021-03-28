@@ -7,7 +7,7 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
 
     usuario_tabla = Database.Usuario
 
-    @usuarios_bp.route("/usuarios/login", methods=["POST"])
+    @usuarios_bp.route("/login/usuarios", methods=["POST"])
     def login_usuario():
 
         datos_entrada = request.json
