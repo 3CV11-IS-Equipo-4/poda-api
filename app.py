@@ -6,6 +6,7 @@ import os
 #Blueprints
 from src.solicitudes.solicitudes import construir_bp_solicitudes
 from src.usuarios.usuarios import construir_bp_usuarios
+from src.Ciudadanos.CI_login import construir_bp_ciudadano
 
 app = Flask(__name__) 
 
@@ -34,9 +35,11 @@ app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
 # Table 
 solicitud_tabla = Database.Solicitud
 usuario_tabla = Database.Usuario
+ciudadano_tabla = Database.Ciudadano
 
 app.register_blueprint(construir_bp_solicitudes(client, Database, app.secret_key))
 app.register_blueprint(construir_bp_usuarios(client, Database, app.secret_key))
+app.register_blueprint(construir_bp_ciudadano(client, Database, app.secret_key))
 
 @app.route('/')
 def inicial():
