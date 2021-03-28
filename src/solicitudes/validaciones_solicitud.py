@@ -29,6 +29,11 @@ def validaciones_insertar_solicitud(request_data):
         ciudadano["email"] = request_data["email"]
     else:
         datos_faltantes.append("email")
+
+    if "numero_telefono" in request_data.keys():
+        ciudadano["numero_telefono"] = request_data["numero_telefono"]
+    else:
+        datos_faltantes.append("numero_telefono")
     
     if "calle" in request_data.keys():
         ciudadano["calle"] = request_data["calle"]

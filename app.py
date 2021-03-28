@@ -6,6 +6,7 @@ import os
 #Blueprints
 from src.solicitudes.solicitudes import construir_bp_solicitudes
 from src.usuarios.usuarios import construir_bp_usuarios
+from src.ciudadanos.ciudadanos import construir_bp_ciudadanos
 
 app = Flask(__name__) 
 
@@ -37,6 +38,7 @@ usuario_tabla = Database.Usuario
 
 app.register_blueprint(construir_bp_solicitudes(client, Database, app.secret_key))
 app.register_blueprint(construir_bp_usuarios(client, Database, app.secret_key))
+app.register_blueprint(construir_bp_ciudadanos(client, Database, app.secret_key))
 
 @app.route('/')
 def inicial():
