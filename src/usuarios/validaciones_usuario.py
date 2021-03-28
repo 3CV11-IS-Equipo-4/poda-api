@@ -1,4 +1,3 @@
-
 def validaciones_insertar_usuario(request):
     
     informacion_usuario = {}

@@ -8,7 +8,7 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
 
     usuario_tabla = Database.Usuario
 
-    @usuarios_bp.route("/usuarios/login", methods=["POST"])
+    @usuarios_bp.route("/login/usuarios", methods=["POST"])
     def login_usuario():
 
         if request.data:
@@ -160,3 +160,15 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
                         }))
 
     return usuarios_bp
+
+    #Registrar usuarios.
+    @app.route('/usuarios/registrar', methods=['POST'])
+    @cross_origin(supports_credentials=True)
+    def registrar_usuario():
+        datos_entrada = request.json
+        datos_finales_usuario = validaciones_insertar_usuario(datos_entrada)
+        resultado = usuario_tabla.insert_one(datos_finales_usuario)
+        datos_finales_usuario.pop('_id')
+        datos_finales_usuario['_id'] = str(resultado.inserted_id)
+
+        return datos_finales_usuario, 200
