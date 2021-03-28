@@ -112,46 +112,57 @@ def validaciones_insertar_solicitud(request_data):
 
         if solicitud["modalidad"] == "propiedad-privada":
 
-            solicitud["privada"] = {}
+            if "privada" in request_data.keys():
 
-            if "comprobante_domicilio" in request_data.keys():
-                solicitud["privada"]["comprobante_domicilio"] == request_data["comprobante_domicilio"]
-            else:
-                datos_faltantes.append("comprobante_domicilio")
-            
-            if "comprobante_propiedad" in request_data.keys():
-                solicitud["privada"]["comprobante_propiedad"] == request_data["comprobante_propiedad"]
+                solicitud["privada"] = {}
 
-            if "tipo_privada" in request_data.keys():
-                solicitudsolicitud["privada"]["tipo_privada"] == request_data["tipo_privada"]
-
-                if solicitud["privada"]["tipo_privada"] == "construccion":
-                    
-                    solicitud["privada"]["construccion"] = {}
-
-                    if "documento_registro" in request_data.keys():
-                        solicitud["privada"]["construccion"]["documento_registro"] = request_data["documento_registro"]
-                    else:
-                        faltantes.append("documento_registro")
-
-                    if "documento_planos" in request_data.keys():
-                        solicitud["privada"]["construccion"]["documento_planos"] = request_data["documento_planos"]
-                    else:
-                        faltantes.append("documento_planos")
-
-                    if "documento_declaratoria" in request_data.keys():
-                        solicitud["privada"]["construccion"]["documento_declaratoria"] = request_data["documento_declaratoria"]
-                    else:
-                        faltantes.append("documento_declaratoria")
+                if "comprobante_domicilio" in request_data["privada"].keys():
+                    solicitud["privada"]["comprobante_domicilio"] = request_data["privada"]["comprobante_domicilio"]
+                else:
+                    datos_faltantes.append("comprobante_domicilio")
                 
-                elif solicitud["privada"]["tipo_privada"] == "riesgo":
+                if "comprobante_propiedad" in request_data["privada"].keys():
+                    solicitud["privada"]["comprobante_propiedad"] = request_data["privada"]["comprobante_propiedad"]
+                else:
+                    datos_faltantes.append("comprobante_propiedad")
 
-                    solicitud["privada"]["riesgo"] = {}
+                if "tipo_privada" in request_data["privada"].keys():
+                    solicitud["privada"]["tipo_privada"] = request_data["privada"]["tipo_privada"]
 
-                    if "documento_dictamen_riesgo" in request_data.keys():
-                        solicitud["privada"]["riesgo"]["documento_dictamen_riesgo"] = request_data["documento_dictamen_riesgo"]
-                    else:
-                        datos_faltantes.append("documento_dictamen_riesgo")
+                    if solicitud["privada"]["tipo_privada"] == "construccion":
+                        
+                        if "construccion" in request_data["privada"]:
+                            
+                            solicitud["privada"]["construccion"] = {}
+
+                            if "documento_registro" in request_data["privada"]["construccion"].keys():
+                                solicitud["privada"]["construccion"]["documento_registro"] = request_data["privada"]["construccion"]["documento_registro"]
+                            else:
+                                datos_faltantes.append("documento_registro")
+
+                            if "documento_planos" in request_data["privada"]["construccion"].keys():
+                                solicitud["privada"]["construccion"]["documento_planos"] = request_data["privada"]["construccion"]["documento_planos"]
+                            else:
+                                datos_faltantes.append("documento_planos")                                
+
+                            if "documento_declaratoria" in request_data["privada"]["construccion"].keys():
+                                solicitud["privada"]["construccion"]["documento_declaratoria"] = request_data["privada"]["construccion"]["documento_declaratoria"]
+                            else:
+                                datos_faltantes.append("documento_declaratoria")                                
+                        else:
+                            datos_faltantes.append("construccion")
+
+                    elif solicitud["privada"]["tipo_privada"] == "riesgo":
+
+                        solicitud["privada"]["riesgo"] = {}
+
+                        if "documento_dictamen_riesgo" in request_data["privada"]["riesgo"].keys():
+                                solicitud["privada"]["riesgo"]["documento_dictamen_riesgo"] = request_data["privada"]["riesgo"]["documento_dictamen_riesgo"]
+                        else:
+                            datos_faltantes.append("documento_dictamen_riesgo")
+                else:
+                    datos_faltantes.append("tipo_privada")
+    
     else:
         datos_faltantes.append("modalidad")
     
