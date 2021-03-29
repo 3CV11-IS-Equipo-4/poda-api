@@ -19,26 +19,24 @@ def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
             registro_ciudadano = ciudadano_tabla.find_one(datos_entrada)
             if registro_ciudadano is not None:
 
-                token = encode_auth_token_ciudadano(registro_ciudadano["email"], SECRET_KEY)
+               token = encode_auth_token_ciudadano(registro_ciudadano["email"], 
+                                                    registro_ciudadano["nombres"], 
+                                                    registro_ciudadano["_id"],
+                                                    SECRET_KEY)
 
-                respuesta_datos = {"nombres" : registro_ciudadano["nombres"],
-                                    "email" : registro_ciudadano["email"]
-                                    }
-
-                resulting_response = make_response((respuesta_datos, 200, 
-                {
+                return make_response(({"autenticacion": True, "key" : token}, 200, {
                     'Access-Control-Allow-Origin': '*', 
-                    'mimetype':'application/json',
-                    'x-access-token': token
-                    }
-                ))
+                    'mimetype':'application/json'}))
 
-                return resulting_response
             else:
                 return make_response({"autenticacion": False}, 400, {
                     'Access-Control-Allow-Origin': '*', 
                     'mimetype':'application/json'
                     })
         else:
-            return 'Acceso incorrecto'
-    return ciudadano_bp
+            return make_response(({"autenticacion": False}, 400, {
+                    'Access-Control-Allow-Origin': '*', 
+                    'mimetype':'application/json'
+                }))
+
+    return ciudadanos_bp
