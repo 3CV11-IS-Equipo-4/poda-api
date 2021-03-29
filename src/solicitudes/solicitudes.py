@@ -3,6 +3,7 @@ from pymongo.collection import ReturnDocument
 from src.solicitudes.validaciones_solicitud import validaciones_insertar_solicitud
 from src.usuarios.auth import decode_auth_token_usuario
 from src.ciudadanos.auth import decode_auth_token_ciudadano
+from bson.objectid import ObjectId
 
 def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
@@ -111,8 +112,8 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
             return resulting_response        
 
 
-    @solicitudes_bp.route("/solicitudes/<folio>", methods=["PATCH", "GET"])
-    def aceptar_solicitud(folio):
+    @solicitudes_bp.route("/solicitudes/<id>", methods=["PATCH", "GET"])
+    def aceptar_solicitud(id):
 
         if "x-access-token" in request.headers:
             
@@ -131,7 +132,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                 if request.method == "PATCH":
                     usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
 
-                    datos_solicitud = solicitud_tabla.find_one({"folio" : int(folio)})
+                    datos_solicitud = solicitud_tabla.find_one({"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")})
 
                     datos_entrada = request.json
                     if datos_entrada["aceptada"]:
@@ -156,14 +157,14 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                             return resulting_response
 
                         solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"folio" : int(folio)}, 
+                                                {"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")}, 
                                                 {"$set" : {"estado" : nuevo_estado}},
                                                 return_document=ReturnDocument.AFTER
                                             )
                         
                     else:
                         solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"folio" : int(folio)}, 
+                                                {"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")}, 
                                                 {"$set" : {"estado" : "Solicitud rechazada"}},
                                                 return_document=ReturnDocument.AFTER
                                             )
@@ -185,7 +186,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                     #Método GET.
                     usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
 
-                    solicitud_encontrada = solicitud_tabla.find_one({"folio" : int(folio)})    
+                    solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")})    
 
                     solicitud_filtrada = {}
 

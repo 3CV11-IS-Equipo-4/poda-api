@@ -21,13 +21,12 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
 
                     token = encode_auth_token_usuario(registro_usuario["email"], registro_usuario["nombres"], 
                                                     registro_usuario["telefono"], registro_usuario["rol"], 
-                                                    registro_usuario["permiso_administrador"], SECRET_KEY)
+                                                    registro_usuario["permiso_administrador"], str(registro_usuario["_id"]), SECRET_KEY)
 
-                    resulting_response = make_response(({"autenticacion": True}, 200, 
+                    resulting_response = make_response(({"autenticacion": True, "key" : token }, 200, 
                     {
                         'Access-Control-Allow-Origin': '*', 
-                        'mimetype':'application/json',
-                        'x-access-token': token
+                        'mimetype':'application/json'
                         }
                     ))
 

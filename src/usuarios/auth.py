@@ -1,7 +1,7 @@
 import jwt
 import datetime
 
-def encode_auth_token_usuario(usuario_email, nombres, telefono, rol, permiso_administrador, SECRET_KEY):
+def encode_auth_token_usuario(usuario_email, nombres, telefono, rol, permiso_administrador, usuario_id, SECRET_KEY):
     """
     Genera el token de autenticación para un usuario.
     """
@@ -15,7 +15,9 @@ def encode_auth_token_usuario(usuario_email, nombres, telefono, rol, permiso_adm
                 "nombres" : nombres,
                 "telefono" : telefono,
                 "rol" : rol,
-                "permiso_administrador" : permiso_administrador
+                "permiso_administrador" : permiso_administrador,
+                "_id" : usuario_id
+
             }
         }
         
