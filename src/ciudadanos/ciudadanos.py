@@ -3,11 +3,11 @@ from src.ciudadanos.auth import encode_auth_token_ciudadano
 import pymongo
 
 def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
-    ciudadano_bp = Blueprint('ciudadano_bp', __name__)
+    ciudadanos_bp = Blueprint('ciudadano_bp', __name__)
 
     ciudadano_tabla = Database.Ciudadano
 
-    @ciudadano_bp.route("/ciudadanos/login", methods=["POST"])
+    @ciudadanos_bp.route("/ciudadanos/login", methods=["POST"])
     def login_ciudadano():
 
         datos_entrada={}
@@ -19,7 +19,7 @@ def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
             registro_ciudadano = ciudadano_tabla.find_one(datos_entrada)
             if registro_ciudadano is not None:
 
-               token = encode_auth_token_ciudadano(registro_ciudadano["email"], 
+                token = encode_auth_token_ciudadano(registro_ciudadano["email"], 
                                                     registro_ciudadano["nombres"], 
                                                     registro_ciudadano["_id"],
                                                     SECRET_KEY)

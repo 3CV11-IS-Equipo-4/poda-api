@@ -151,7 +151,7 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
                         'mimetype':'application/json'
                         }))      
 
-    @usuarios_bp.route("/usuarios", methods=["GET"])
+    """@usuarios_bp.route("/usuarios", methods=["GET"])
     def consultar_usuarios():
 
         if "x-access-token" in request.headers:
@@ -190,8 +190,7 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
                         'Access-Control-Allow-Origin': '*', 
                         'mimetype':'application/json'
                         }))
-
-    return usuarios_bp
+    """
     
     @usuarios_bp.route('/usuarios/registrar', methods=['POST'])
     def registrar_usuario():
