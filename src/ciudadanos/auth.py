@@ -1,7 +1,9 @@
 import jwt
 import datetime
 
+
 def encode_auth_token_ciudadano(ciudadano_email, nombres, ciudadano_id, SECRET_KEY):
+
     """
     Genera el token de autenticación para un ciudadano.
     """
@@ -18,6 +20,7 @@ def encode_auth_token_ciudadano(ciudadano_email, nombres, ciudadano_id, SECRET_K
         }
         
         return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
     except Exception as e:
         return e
 
@@ -27,6 +30,7 @@ def decode_auth_token_ciudadano(auth_token, SECRET_KEY):
     """
     try:
         payload = jwt.decode(auth_token, SECRET_KEY, algorithms=['HS256'])
+
         return payload['sub']
     except jwt.ExpiredSignatureError:
         return -1

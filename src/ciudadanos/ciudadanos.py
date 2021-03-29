@@ -1,16 +1,17 @@
-from flask import Blueprint, request, make_response, jsonify
-from src.ciudadanos.auth import encode_auth_token_ciudadano, decode_auth_token_ciudadano
+from flask import Blueprint, request, make_response
+from src.ciudadanos.auth import encode_auth_token_ciudadano
 import pymongo
-from pymongo.collection import ObjectId
+
 
 def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
-    ciudadanos_bp = Blueprint('ciudadanos_bp', __name__)
+    ciudadano_bp = Blueprint('ciudadano_bp', __name__)
 
     ciudadano_tabla = Database.Ciudadano
 
+
     @ciudadanos_bp.route("/ciudadanos/login", methods=["POST"])
-    def login_ciudadano():
-        
+    def login_ciudadano():        
+
         datos_entrada={}
         datos_entrada = request.json
         print(type(datos_entrada))

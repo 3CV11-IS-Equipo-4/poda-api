@@ -3,6 +3,8 @@ from pymongo.collection import ReturnDocument
 from src.solicitudes.validaciones_solicitud import validaciones_insertar_solicitud
 from src.usuarios.auth import decode_auth_token_usuario
 from src.ciudadanos.auth import decode_auth_token_ciudadano
+from src.control import verificar_authorization
+from bson.objectid import ObjectId
 
 def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
@@ -15,7 +17,11 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
     @solicitudes_bp.route("/solicitudes/usuarios/", methods=["GET"])
     def consultar_solicitudes_usuario():
 
-        decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
+        autorizacion = verificar_authorization(request)
+        if len(autorizacion) != 0:
+            return autorizacion
+
+        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                  400, 
@@ -38,15 +44,19 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
             resulting_response = make_response((datos_filtrados_solicitudes, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
-                                                'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                'mimetype':'application/json'
+                                                }))
 
             return resulting_response
 
     @solicitudes_bp.route("/solicitudes/ciudadanos/", methods=["GET"])
     def consultar_solicitudes_ciudadanos():
 
-        decoded_token = decode_auth_token_ciudadano(request.headers["x-access-token"], SECRET_KEY)
+        autorizacion = verificar_authorization(request)
+        if len(autorizacion) != 0:
+            return autorizacion           
+
+        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                  400, 
@@ -72,15 +82,19 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
             resulting_response = make_response((datos_filtrados_solicitudes, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
-                                                'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                'mimetype':'application/json'
+                                                }))
 
             return resulting_response
     
-    @solicitudes_bp.route("/solicitudes/ciudadanos/<folio>", methods=["GET"])
-    def consultar_solicitud_especifica_ciudadano(folio):
+    @solicitudes_bp.route("/solicitudes/ciudadanos/<id>", methods=["GET"])
+    def consultar_solicitud_especifica_ciudadano(id):
 
-        decoded_token = decode_auth_token_ciudadano(request.headers["x-access-token"], SECRET_KEY)
+        autorizacion = verificar_authorization(request)
+        if len(autorizacion) != 0:
+            return autorizacion           
+
+        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                 400, 
@@ -94,7 +108,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
         else:
             ciudadano_Datos = ciudadano_tabla.find_one({"email": decoded_token})
 
-            solicitud_encontrada = solicitud_tabla.find_one({"folio" : int(folio), "email" : decoded_token["email"]})    
+            solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id), "email" : decoded_token["email"]})    
 
             solicitud_filtrada = {}
             for key in solicitud_encontrada:
@@ -106,109 +120,106 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
             resulting_response = make_response((solicitud_filtrada, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
                                                 'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                }))
 
             return resulting_response        
 
 
-    @solicitudes_bp.route("/solicitudes/<folio>", methods=["PATCH", "GET"])
-    def aceptar_solicitud(folio):
+    @solicitudes_bp.route("/solicitudes/<id>", methods=["PATCH", "GET"])
+    def aceptar_solicitud(id):
 
-        if "x-access-token" in request.headers:
-            
-            decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
-            if decoded_token == -1:
-                return make_response({"error" : "Sesión expirada."}, 
-                                    400, 
-                                    {'Access-Control-Allow-Origin': '*', 
-                                        'mimetype':'application/json'})            
-            elif decoded_token == -2:
-                return make_response({"error" : "Usuario inválido"}, 
-                                    400, 
-                                    {'Access-Control-Allow-Origin': '*', 
-                                        'mimetype':'application/json'})
-            else:
-                if request.method == "PATCH":
-                    usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
+        autorizacion = verificar_authorization(request)
+        if len(autorizacion) != 0:
+            return autorizacion          
 
-                    datos_solicitud = solicitud_tabla.find_one({"folio" : int(folio)})
-
-                    datos_entrada = request.json
-                    if datos_entrada["aceptada"]:
-                        
-                        nuevo_estado = ""
-
-                        if usuario_datos["rol"] == "ROP" and datos_solicitud["estado"] == "En revision de documentos por oficialía de partes":
-                            nuevo_estado = "En revisión de documentos por Jefe de Área"
-                        elif usuario_datos["rol"] == "JA" and datos_solicitud["estado"] == "En revisión de documentos por Jefe de Área":
-                            nuevo_estado = "En revisión de información por Dictaminador"
-                        elif usuario_datos["rol"] == "DI" and datos_solicitud["estado"] == "En revisión de información por Dictaminador":
-                            if datos_solicitud["tipo_de_servicio"] == "Poda":
-                                nuevo_estado = "Poda de árbol aceptada"
-                            elif datos_solicitud["tipo_de_servicio"] == "Derribo":
-                                nuevo_estado = "Derribo de árbol aceptado"  
-
-                        else:
-                            resulting_response = make_response(({"error" : "No tienes permiso para realizar esa acción."}, 400, 
-                                                                {'Access-Control-Allow-Origin': '*', 
-                                                                'mimetype':'application/json',
-                                                                'x-access-token': request.headers["x-access-token"]}))
-                            return resulting_response
-
-                        solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"folio" : int(folio)}, 
-                                                {"$set" : {"estado" : nuevo_estado}},
-                                                return_document=ReturnDocument.AFTER
-                                            )
-                        
-                    else:
-                        solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"folio" : int(folio)}, 
-                                                {"$set" : {"estado" : "Solicitud rechazada"}},
-                                                return_document=ReturnDocument.AFTER
-                                            )
-
-                    registro_actualizado = {}
-                    for key in solicitud_actualizada:
-                        registro_actualizado[key] = solicitud_actualizada[key]
-                    
-                    registro_actualizado.pop('_id')
-                    registro_actualizado['_id'] = str(solicitud_actualizada['_id'])
-
-                    resulting_response = make_response((registro_actualizado, 200, 
-                                                        {'Access-Control-Allow-Origin': '*', 
-                                                        'mimetype':'application/json',
-                                                        'x-access-token': request.headers["x-access-token"]}))
-
-                    return resulting_response                
-                else:
-                    #Método GET.
-                    usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
-
-                    solicitud_encontrada = solicitud_tabla.find_one({"folio" : int(folio)})    
-
-                    solicitud_filtrada = {}
-
-                    if solicitud_encontrada is not None:
-
-                        for key in solicitud_encontrada:
-                            solicitud_filtrada[key] = solicitud_encontrada[key]
-                        
-                        solicitud_filtrada.pop('_id')
-                        solicitud_filtrada['_id'] = str(solicitud_encontrada['_id'])
-
-                    resulting_response = make_response((solicitud_filtrada, 200, 
-                                                        {'Access-Control-Allow-Origin': '*', 
-                                                        'mimetype':'application/json',
-                                                        'x-access-token': request.headers["x-access-token"]}))
-
-                    return resulting_response                    
-
-        else:
+        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
+        if decoded_token == -1:
+            return make_response({"error" : "Sesión expirada."}, 
+                                400, 
+                                {'Access-Control-Allow-Origin': '*', 
+                                    'mimetype':'application/json'})            
+        elif decoded_token == -2:
             return make_response({"error" : "Usuario inválido"}, 
                                 400, 
                                 {'Access-Control-Allow-Origin': '*', 
                                     'mimetype':'application/json'})
+        else:
+            if request.method == "PATCH":
+                usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
+
+                datos_solicitud = solicitud_tabla.find_one({"_id" : ObjectId(id)})
+
+                datos_entrada = request.json
+                if datos_entrada["aceptada"]:
+                    
+                    nuevo_estado = ""
+
+                    if usuario_datos["rol"] == "ROP" and datos_solicitud["estado"] == "En revision de documentos por oficialía de partes":
+                        nuevo_estado = "En revisión de documentos por Jefe de Área"
+                    elif usuario_datos["rol"] == "JA" and datos_solicitud["estado"] == "En revisión de documentos por Jefe de Área":
+                        nuevo_estado = "En revisión de información por Dictaminador"
+                    elif usuario_datos["rol"] == "DI" and datos_solicitud["estado"] == "En revisión de información por Dictaminador":
+                        if datos_solicitud["tipo_de_servicio"] == "Poda":
+                            nuevo_estado = "Poda de árbol aceptada"
+                        elif datos_solicitud["tipo_de_servicio"] == "Derribo":
+                            nuevo_estado = "Derribo de árbol aceptado"  
+
+                    else:
+                        resulting_response = make_response(({"error" : "No tienes permiso para realizar esa acción."}, 400, 
+                                                            {'Access-Control-Allow-Origin': '*', 
+                                                            'mimetype':'application/json'
+                                                            }))
+                        return resulting_response
+
+                    solicitud_actualizada = solicitud_tabla.find_one_and_update(
+                                            {"_id" : ObjectId(id)}, 
+                                            {"$set" : {"estado" : nuevo_estado}},
+                                            return_document=ReturnDocument.AFTER
+                                        )
+                    
+                else:
+                    solicitud_actualizada = solicitud_tabla.find_one_and_update(
+                                            {"_id" : ObjectId(id)}, 
+                                            {"$set" : {"estado" : "Solicitud rechazada"}},
+                                            return_document=ReturnDocument.AFTER
+                                        )
+
+                registro_actualizado = {}
+                for key in solicitud_actualizada:
+                    registro_actualizado[key] = solicitud_actualizada[key]
+                
+                registro_actualizado.pop('_id')
+                registro_actualizado['_id'] = str(solicitud_actualizada['_id'])
+
+                resulting_response = make_response((registro_actualizado, 200, 
+                                                    {'Access-Control-Allow-Origin': '*', 
+                                                    'mimetype':'application/json'
+                                                    }))
+
+                return resulting_response                
+            else:
+                #Método GET.
+                usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
+
+                solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id)})    
+
+                solicitud_filtrada = {}
+
+                if solicitud_encontrada is not None:
+
+                    for key in solicitud_encontrada:
+                        solicitud_filtrada[key] = solicitud_encontrada[key]
+                    
+                    solicitud_filtrada.pop('_id')
+                    solicitud_filtrada['_id'] = str(solicitud_encontrada['_id'])
+
+                resulting_response = make_response((solicitud_filtrada, 200, 
+                                                    {'Access-Control-Allow-Origin': '*', 
+                                                    'mimetype':'application/json'
+                                                    }))
+
+                return resulting_response                    
+
 
     @solicitudes_bp.route("/solicitudes/", methods=["POST"])
     def registrar_solictud():
@@ -235,12 +246,14 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                 ciudadano["password"] = str(ciudadano["codigo_postal"]) + str(solicitud["folio"]) 
                 ciudadano_tabla.insert_one(ciudadano)
             
-            resulting_response = make_response((solicitud, 201, {'Access-Control-Allow-Origin': '*', 'mimetype':'application/json'}))
+            resulting_response = make_response((solicitud, 201, {'Access-Control-Allow-Origin': '*', 
+                                                                'mimetype':'application/json'}))
             return resulting_response
 
         else:
             response_content = {"datos_faltantes" : datos_faltantes}
-            resulting_response = make_response((response_content, 400, {'Access-Control-Allow-Origin': '*', 'mimetype':'application/json'}))
+            resulting_response = make_response((response_content, 400, {'Access-Control-Allow-Origin': '*', 
+                                                                        'mimetype':'application/json'}))
             return resulting_response
 
     return solicitudes_bp
