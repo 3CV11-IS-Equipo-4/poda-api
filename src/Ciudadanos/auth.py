@@ -1,7 +1,7 @@
 import jwt
 import datetime
 
-def encode_auth_token_ciudadano(ciudadano_email, SECRET_KEY):
+def encode_auth_token_ciudadano(ciudadano_email, nombres, ciudadano_id, SECRET_KEY):
     """
     Genera el token de autenticación para un ciudadano.
     """
@@ -10,7 +10,11 @@ def encode_auth_token_ciudadano(ciudadano_email, SECRET_KEY):
         payload = {
             'exp' : datetime.datetime.utcnow() + datetime.timedelta(days=1, seconds=0),
             'iat' : datetime.datetime.utcnow(),
-            'sub' : ciudadano_email
+            'sub' : {
+                "email":ciudadano_email,
+                "nombres": nombres,
+                "_id": ciudadano_id
+                }
         }
         
         return jwt.encode(payload, SECRET_KEY, algorithm='ES256')
