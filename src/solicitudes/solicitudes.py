@@ -56,7 +56,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
         if len(autorizacion) != 0:
             return autorizacion           
 
-        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
+        decoded_token = decode_auth_token_ciudadano(request.headers["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                  400, 
@@ -94,7 +94,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
         if len(autorizacion) != 0:
             return autorizacion           
 
-        decoded_token = decode_auth_token_usuario(request.headers["Authorization"].split()[1], SECRET_KEY)
+        decoded_token = decode_auth_token_ciudadano(request.headers["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                 400, 
