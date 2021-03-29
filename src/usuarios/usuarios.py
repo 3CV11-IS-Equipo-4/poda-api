@@ -158,6 +158,48 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
                         'mimetype':'application/json'
                         }))
 
+            return resulting_response         
+
+    @usuarios_bp.route("/usuarios", methods=["GET"])
+    def consultar_usuarios():
+
+        if "x-access-token" in request.headers:
+            print("Sí hay token")
+            decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
+            if decoded_token == -1:
+                body = {"error" : "Sesión expirada"}
+                codigo_respuesta = 400
+            elif decoded_token == -2:
+                body = {"error" : "Usuario inválido."}
+                codigo_respuesta = 400
+            else:
+                print(decoded_token)
+                if decoded_token["permiso_administrador"]:
+                    usuarios_datos = usuario_tabla.find()
+
+                    datos_filtrados_usuarios = {"usuarios" : []}
+
+                    if usuarios_datos is not None:
+                        for usuario in usuarios_datos:
+                            temp__id = str(usuario["_id"])
+                            usuario["_id"] = temp__id
+                            datos_filtrados_usuarios["usuarios"].append(usuario)
+
+                    body = datos_filtrados_usuarios  
+                    codigo_respuesta = 200               
+
+                else:
+                    body = {"error" : "No tienes permiso."}
+                    codigo_respuesta = 400
+        else:
+            body = {"error" : "No tienes permiso."}
+            codigo_respuesta = 400
+
+        return make_response((body, codigo_respuesta,{
+                        'Access-Control-Allow-Origin': '*', 
+                        'mimetype':'application/json'
+                        }))
+
     return usuarios_bp
     
     @usuarios_bp.route('/usuarios/registrar', methods=['POST'])
