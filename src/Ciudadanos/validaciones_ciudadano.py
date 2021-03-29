@@ -13,6 +13,5 @@ def validaciones_insertar_ciudadano(request):
     informacion_ciudadano['alcaldia'] = request['alcaldia']
     informacion_ciudadano['numero_exterior'] = request['numero_exterior']
     informacion_ciudadano['codigo_postal'] = request['codigo_postal']
-    informacion_ciudadano['_id'] = request ['_id']
 
     return informacion_ciudadano

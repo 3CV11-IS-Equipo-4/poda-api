@@ -160,11 +160,12 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
 
     return usuarios_bp
     
-    #Registrar usuarios.
-    @usuarios_bp.route('/usuarios', methods=['POST'])
+    @usuarios_bp.route('/usuarios/registrar', methods=['POST'])
     def registrar_usuario():
         
         datos_entrada = request.json
+        print(type(datos_entrada))
+        print(datos_entrada) 
         datos_finales_usuario = validaciones_usuario(datos_entrada)
         resultado = usuario_tabla.insert_one(datos_finales_usuario)
         datos_finales_usuario.pop('_id')

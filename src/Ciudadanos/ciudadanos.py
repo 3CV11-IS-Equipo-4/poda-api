@@ -1,8 +1,7 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
 from src.ciudadanos.auth import encode_auth_token_ciudadano, decode_auth_token_ciudadano
 import pymongo
-from pymongo.collection import ReturnDocument
-
+from pymongo.collection import ObjectId
 
 def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
     ciudadanos_bp = Blueprint('ciudadanos_bp', __name__)
@@ -11,7 +10,7 @@ def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
 
     @ciudadanos_bp.route("/ciudadanos/login", methods=["POST"])
     def login_ciudadano():
-
+        
         datos_entrada={}
         datos_entrada = request.json
         print(type(datos_entrada))
@@ -23,23 +22,21 @@ def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
 
                 token = encode_auth_token_ciudadano(registro_ciudadano["email"], 
                                                     registro_ciudadano["nombres"], 
-                                                    str(registro_ciudadano["_id"]),
-                                                    registro_ciudadano["_id"] = str(registro_ciudadano["_id"]),
+                                                    registro_ciudadano["_id"],
                                                     SECRET_KEY)
 
-                resulting_response = make_response(({"autenticacion": True, "key": token}, 200, 
-                {
+                return make_response(({"autenticacion": True, "key" : token}, 200, {
                     'Access-Control-Allow-Origin': '*', 
-                    'mimetype':'application/json'
-                    }
-                ))
-
-                return resulting_response
+                    'mimetype':'application/json'}))
             else:
-                return make_response({"autenticacion": False}, 400, {
+                return make_response(({"autenticacion": False}, 400, {
                     'Access-Control-Allow-Origin': '*', 
                     'mimetype':'application/json'
-                    })
+                }))
         else:
-            return 'Acceso incorrecto'
+            return make_response(({"autenticacion": False}, 400, {
+                    'Access-Control-Allow-Origin': '*', 
+                    'mimetype':'application/json'
+                }))
+
     return ciudadanos_bp
