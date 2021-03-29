@@ -2,7 +2,7 @@ from flask import Blueprint, request, make_response
 from src.ciudadanos.auth import encode_auth_token_ciudadano
 import pymongo
 
-def construir_bp_ciudadanos(cliente_mongo, Database, SECRET_KEY):
+def construir_bp_ciudadano(cliente_mongo, Database, SECRET_KEY):
     ciudadano_bp = Blueprint('ciudadano_bp', __name__)
 
     ciudadano_tabla = Database.Ciudadano

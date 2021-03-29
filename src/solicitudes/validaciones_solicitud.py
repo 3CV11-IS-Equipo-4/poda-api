@@ -13,14 +13,14 @@ def validaciones_insertar_solicitud(request_data):
         datos_faltantes.append("nombres")
     
     if "apellido_paterno" in request_data.keys():
-        solicitud["apellito_paterno"] = request_data["apellido_paterno"]
-        ciudadano["apellito_paterno"] = request_data["apellido_paterno"]
+        solicitud["apellido_paterno"] = request_data["apellido_paterno"]
+        ciudadano["apellido_paterno"] = request_data["apellido_paterno"]
     else:
         datos_faltantes.append("apellido_paterno")
 
     if "apellido_materno" in request_data.keys():
-        solicitud["apellito_materno"] = request_data["apellido_materno"]
-        ciudadano["apellito_materno"] = request_data["apellido_materno"]
+        solicitud["apellido_materno"] = request_data["apellido_materno"]
+        ciudadano["apellido_materno"] = request_data["apellido_materno"]
     else:
         datos_faltantes.append("apellido_materno")
     
