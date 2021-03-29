@@ -106,21 +106,35 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                                 {'Access-Control-Allow-Origin': '*', 
                                     'mimetype':'application/json'})
         else:
-            ciudadano_Datos = ciudadano_tabla.find_one({"email": decoded_token})
+            ciudadano_Datos = ciudadano_tabla.find_one({"email": decoded_token["email"]})
 
-            solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id), "email" : decoded_token["email"]})    
+            if not ObjectId.is_valid(id):
+                resulting_response = make_response(({"error" : "Información inválida"}, 400, 
+                                                    {'Access-Control-Allow-Origin': '*', 
+                                                    'mimetype':'application/json',
+                                                    }))
+            else:
 
-            solicitud_filtrada = {}
-            for key in solicitud_encontrada:
-                solicitud_filtrada[key] = solicitud_encontrada[key]
-            
-            solicitud_filtrada.pop('_id')
-            solicitud_filtrada['_id'] = str(solicitud_encontrada['_id'])
+                solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id), "email" : decoded_token["email"]})    
 
-            resulting_response = make_response((solicitud_filtrada, 200, 
-                                                {'Access-Control-Allow-Origin': '*', 
-                                                'mimetype':'application/json',
-                                                }))
+                if solicitud_encontrada is None:
+                    resulting_response = make_response(({"error" : "Información inválida"}, 400,
+                                    {'Access-Control-Allow-Origin': '*', 
+                                    'mimetype':'application/json',
+                                    }))
+
+                else:
+                    solicitud_filtrada = {}
+                    for key in solicitud_encontrada:
+                        solicitud_filtrada[key] = solicitud_encontrada[key]
+                    
+                    solicitud_filtrada.pop('_id')
+                    solicitud_filtrada['_id'] = str(solicitud_encontrada['_id'])
+
+                    resulting_response = make_response((solicitud_filtrada, 200, 
+                                                        {'Access-Control-Allow-Origin': '*', 
+                                                        'mimetype':'application/json',
+                                                        }))
 
             return resulting_response        
 
