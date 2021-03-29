@@ -15,12 +15,13 @@ app = Flask(__name__)
 CONNECTION_URL = os.environ.get('CONNECTION_URL')
 DB_NAME = os.environ.get('DB_NAME')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 if CONNECTION_URL[0] == chr(34) and CONNECTION_URL[-1] == chr(34):
 	client = pymongo.MongoClient(CONNECTION_URL[1:-1]) 
 else:
-	client = pymongo.MongoClient(CONNECTION_URL) 
+	client = pymongo.MongoClient(CONNECTION_URL)
 
 # Database
 try:
@@ -33,7 +34,7 @@ CORS(app, supoort_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 #Manejor de Login
-app.secret_key = b'*\x90\x85u\xf6p"\x97\x1a=<\xa2&JF\xf7'
+app.secret_key = SECRET_KEY
 
 # Table 
 solicitud_tabla = Database.Solicitud
