@@ -16,7 +16,21 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
     @solicitudes_bp.route("/solicitudes/usuarios/", methods=["GET"])
     def consultar_solicitudes_usuario():
 
-        decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
+        if request.data:
+            if "Authorization" in request.json.keys():
+                pass
+            else:
+                return make_response({"error" : "No tienes autorización."}, 
+                                    400, 
+                                    {'Access-Control-Allow-Origin': '*', 
+                                        'mimetype':'application/json'})
+        else:
+            return make_response({"error" : "No tienes autorización."}, 
+                                 400, 
+                                 {'Access-Control-Allow-Origin': '*', 
+                                    'mimetype':'application/json'})
+
+        decoded_token = decode_auth_token_usuario(request.json["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                  400, 
@@ -39,15 +53,29 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
             resulting_response = make_response((datos_filtrados_solicitudes, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
-                                                'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                'mimetype':'application/json'
+                                                }))
 
             return resulting_response
 
     @solicitudes_bp.route("/solicitudes/ciudadanos/", methods=["GET"])
     def consultar_solicitudes_ciudadanos():
 
-        decoded_token = decode_auth_token_ciudadano(request.headers["x-access-token"], SECRET_KEY)
+        if request.data:
+            if "Authorization" in request.json.keys():
+                pass
+            else:
+                return make_response({"error" : "No tienes autorización."}, 
+                                    400, 
+                                    {'Access-Control-Allow-Origin': '*', 
+                                        'mimetype':'application/json'})
+        else:
+            return make_response({"error" : "No tienes autorización."}, 
+                                 400, 
+                                 {'Access-Control-Allow-Origin': '*', 
+                                    'mimetype':'application/json'})
+
+        decoded_token = decode_auth_token_usuario(request.json["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                  400, 
@@ -73,15 +101,29 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
             resulting_response = make_response((datos_filtrados_solicitudes, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
-                                                'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                'mimetype':'application/json'
+                                                }))
 
             return resulting_response
     
-    @solicitudes_bp.route("/solicitudes/ciudadanos/<folio>", methods=["GET"])
-    def consultar_solicitud_especifica_ciudadano(folio):
+    @solicitudes_bp.route("/solicitudes/ciudadanos/<id>", methods=["GET"])
+    def consultar_solicitud_especifica_ciudadano(id):
 
-        decoded_token = decode_auth_token_ciudadano(request.headers["x-access-token"], SECRET_KEY)
+        if request.data:
+            if "Authorization" in request.json.keys():
+                pass
+            else:
+                return make_response({"error" : "No tienes autorización."}, 
+                                    400, 
+                                    {'Access-Control-Allow-Origin': '*', 
+                                        'mimetype':'application/json'})
+        else:
+            return make_response({"error" : "No tienes autorización."}, 
+                                 400, 
+                                 {'Access-Control-Allow-Origin': '*', 
+                                    'mimetype':'application/json'})
+
+        decoded_token = decode_auth_token_usuario(request.json["Authorization"].split()[1], SECRET_KEY)
         if decoded_token == -1:
             return make_response({"error" : "Sesión expirada."}, 
                                 400, 
@@ -95,7 +137,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
         else:
             ciudadano_Datos = ciudadano_tabla.find_one({"email": decoded_token})
 
-            solicitud_encontrada = solicitud_tabla.find_one({"folio" : int(folio), "email" : decoded_token["email"]})    
+            solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id), "email" : decoded_token["email"]})    
 
             solicitud_filtrada = {}
             for key in solicitud_encontrada:
@@ -107,7 +149,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
             resulting_response = make_response((solicitud_filtrada, 200, 
                                                 {'Access-Control-Allow-Origin': '*', 
                                                 'mimetype':'application/json',
-                                                'x-access-token': request.headers["x-access-token"]}))
+                                                }))
 
             return resulting_response        
 
@@ -115,9 +157,23 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
     @solicitudes_bp.route("/solicitudes/<id>", methods=["PATCH", "GET"])
     def aceptar_solicitud(id):
 
-        if "x-access-token" in request.headers:
+        if True:
             
-            decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
+            if request.data:
+                if "Authorization" in request.json.keys():
+                    pass
+                else:
+                    return make_response({"error" : "No tienes autorización."}, 
+                                        400, 
+                                        {'Access-Control-Allow-Origin': '*', 
+                                            'mimetype':'application/json'})
+            else:
+                return make_response({"error" : "No tienes autorización."}, 
+                                    400, 
+                                    {'Access-Control-Allow-Origin': '*', 
+                                        'mimetype':'application/json'})
+
+            decoded_token = decode_auth_token_usuario(request.json["Authorization"].split()[1], SECRET_KEY)
             if decoded_token == -1:
                 return make_response({"error" : "Sesión expirada."}, 
                                     400, 
@@ -132,7 +188,7 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                 if request.method == "PATCH":
                     usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
 
-                    datos_solicitud = solicitud_tabla.find_one({"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")})
+                    datos_solicitud = solicitud_tabla.find_one({"_id" : ObjectId(id)})
 
                     datos_entrada = request.json
                     if datos_entrada["aceptada"]:
@@ -152,19 +208,19 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                         else:
                             resulting_response = make_response(({"error" : "No tienes permiso para realizar esa acción."}, 400, 
                                                                 {'Access-Control-Allow-Origin': '*', 
-                                                                'mimetype':'application/json',
-                                                                'x-access-token': request.headers["x-access-token"]}))
+                                                                'mimetype':'application/json'
+                                                                }))
                             return resulting_response
 
                         solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")}, 
+                                                {"_id" : ObjectId(id)}, 
                                                 {"$set" : {"estado" : nuevo_estado}},
                                                 return_document=ReturnDocument.AFTER
                                             )
                         
                     else:
                         solicitud_actualizada = solicitud_tabla.find_one_and_update(
-                                                {"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")}, 
+                                                {"_id" : ObjectId(id)}, 
                                                 {"$set" : {"estado" : "Solicitud rechazada"}},
                                                 return_document=ReturnDocument.AFTER
                                             )
@@ -178,15 +234,15 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
                     resulting_response = make_response((registro_actualizado, 200, 
                                                         {'Access-Control-Allow-Origin': '*', 
-                                                        'mimetype':'application/json',
-                                                        'x-access-token': request.headers["x-access-token"]}))
+                                                        'mimetype':'application/json'
+                                                        }))
 
                     return resulting_response                
                 else:
                     #Método GET.
                     usuario_datos = usuario_tabla.find_one({"email": decoded_token["email"]})
 
-                    solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId("6060d7bbb2f46ad8bd9d1c3c")})    
+                    solicitud_encontrada = solicitud_tabla.find_one({"_id" : ObjectId(id)})    
 
                     solicitud_filtrada = {}
 
@@ -200,8 +256,8 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
                     resulting_response = make_response((solicitud_filtrada, 200, 
                                                         {'Access-Control-Allow-Origin': '*', 
-                                                        'mimetype':'application/json',
-                                                        'x-access-token': request.headers["x-access-token"]}))
+                                                        'mimetype':'application/json'
+                                                        }))
 
                     return resulting_response                    
 
@@ -236,12 +292,14 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
                 ciudadano["password"] = str(ciudadano["codigo_postal"]) + str(solicitud["folio"]) 
                 ciudadano_tabla.insert_one(ciudadano)
             
-            resulting_response = make_response((solicitud, 201, {'Access-Control-Allow-Origin': '*', 'mimetype':'application/json'}))
+            resulting_response = make_response((solicitud, 201, {'Access-Control-Allow-Origin': '*', 
+                                                                'mimetype':'application/json'}))
             return resulting_response
 
         else:
             response_content = {"datos_faltantes" : datos_faltantes}
-            resulting_response = make_response((response_content, 400, {'Access-Control-Allow-Origin': '*', 'mimetype':'application/json'}))
+            resulting_response = make_response((response_content, 400, {'Access-Control-Allow-Origin': '*', 
+                                                                        'mimetype':'application/json'}))
             return resulting_response
 
     return solicitudes_bp
