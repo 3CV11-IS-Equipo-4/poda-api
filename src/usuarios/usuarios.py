@@ -149,18 +149,61 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
         return make_response((body, codigo_respuesta,{
                         'Access-Control-Allow-Origin': '*', 
                         'mimetype':'application/json'
+                        }))      
+
+    @usuarios_bp.route("/usuarios", methods=["GET"])
+    def consultar_usuarios():
+
+        if "x-access-token" in request.headers:
+            print("Sí hay token")
+            decoded_token = decode_auth_token_usuario(request.headers["x-access-token"], SECRET_KEY)
+            if decoded_token == -1:
+                body = {"error" : "Sesión expirada"}
+                codigo_respuesta = 400
+            elif decoded_token == -2:
+                body = {"error" : "Usuario inválido."}
+                codigo_respuesta = 400
+            else:
+                print(decoded_token)
+                if decoded_token["permiso_administrador"]:
+                    usuarios_datos = usuario_tabla.find()
+
+                    datos_filtrados_usuarios = {"usuarios" : []}
+
+                    if usuarios_datos is not None:
+                        for usuario in usuarios_datos:
+                            temp__id = str(usuario["_id"])
+                            usuario["_id"] = temp__id
+                            datos_filtrados_usuarios["usuarios"].append(usuario)
+
+                    body = datos_filtrados_usuarios  
+                    codigo_respuesta = 200               
+
+                else:
+                    body = {"error" : "No tienes permiso."}
+                    codigo_respuesta = 400
+        else:
+            body = {"error" : "No tienes permiso."}
+            codigo_respuesta = 400
+
+        return make_response((body, codigo_respuesta,{
+                        'Access-Control-Allow-Origin': '*', 
+                        'mimetype':'application/json'
                         }))
 
     return usuarios_bp
-
-    #Registrar usuarios.
-    @app.route('/usuarios/registrar', methods=['POST'])
-    @cross_origin(supports_credentials=True)
+    
+    @usuarios_bp.route('/usuarios/registrar', methods=['POST'])
     def registrar_usuario():
+        
         datos_entrada = request.json
-        datos_finales_usuario = validaciones_insertar_usuario(datos_entrada)
+        print(type(datos_entrada))
+        print(datos_entrada) 
+        datos_finales_usuario = validaciones_usuario(datos_entrada)
         resultado = usuario_tabla.insert_one(datos_finales_usuario)
         datos_finales_usuario.pop('_id')
         datos_finales_usuario['_id'] = str(resultado.inserted_id)
-
+        
         return datos_finales_usuario, 200
+    
+    return usuarios_bp
