@@ -156,9 +156,7 @@ def construir_bp_usuarios(cliente_mongo, Database, SECRET_KEY):
         return make_response((body, codigo_respuesta,{
                         'Access-Control-Allow-Origin': '*', 
                         'mimetype':'application/json'
-                        }))
-
-            return resulting_response         
+                        }))      
 
     @usuarios_bp.route("/usuarios", methods=["GET"])
     def consultar_usuarios():
