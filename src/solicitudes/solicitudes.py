@@ -1,10 +1,13 @@
 from flask import Blueprint, request, make_response
 from pymongo.collection import ReturnDocument
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from src.solicitudes.validaciones_solicitud import validaciones_insertar_solicitud
 from src.usuarios.auth import decode_auth_token_usuario
 from src.ciudadanos.auth import decode_auth_token_ciudadano
 from src.control import verificar_authorization
 from bson.objectid import ObjectId
+import os
 
 def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
 
@@ -259,6 +262,20 @@ def construir_bp_solicitudes(cliente_mongo, Database, SECRET_KEY):
             if busqueda_ciudadano is None:
                 ciudadano["password"] = str(ciudadano["codigo_postal"]) + str(solicitud["folio"]) 
                 ciudadano_tabla.insert_one(ciudadano)
+
+            message = Mail(
+                from_email='ingenieriasoftware21b@gmail.com',
+                to_emails=ciudadano["email"],
+                subject='Poda y Derribo de árboles en CDMX',
+                html_content=f'Buen día. Tu usuario es {ciudadano["email"]}. Tu contraseña es {ciudadano["password"]}')
+            try:
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                response = sg.send(message)
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+            except Exception as e:
+                print(e)
             
             resulting_response = make_response((solicitud, 201, {'Access-Control-Allow-Origin': '*', 
                                                                 'mimetype':'application/json'}))
